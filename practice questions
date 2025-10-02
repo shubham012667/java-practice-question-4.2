@@ -1,0 +1,120 @@
+import java.util.*;
+import java.util.function.*;
+import java.util.stream.*;
+
+public class JavaExamples {
+
+    @FunctionalInterface
+    interface StringTransformer {
+        String transform(String s);
+    }
+
+    public static void main(String[] args) {
+        System.out.println("=== Wrapper classes & Autoboxing/Unboxing ===");
+        wrapperAndBoxingExamples();
+
+        System.out.println("\n=== Lambda Expressions & Functional Interfaces ===");
+        lambdaExamples();
+
+        System.out.println("\n=== Streams + Lambdas ===");
+        streamExamples();
+    }
+
+    static void wrapperAndBoxingExamples() {
+        int prim = 42;
+        Integer wrap = Integer.valueOf(prim);
+        Integer autoBoxed = prim;
+        int unboxed = wrap.intValue();
+        int autoUnboxed = wrap;
+
+        System.out.println("primitive: " + prim);
+        System.out.println("explicit boxed (Integer.valueOf): " + wrap);
+        System.out.println("autoboxed: " + autoBoxed);
+        System.out.println("explicit unboxed: " + unboxed);
+        System.out.println("auto-unboxed: " + autoUnboxed);
+
+        String s = "123";
+        Integer fromString = Integer.parseInt(s);
+        System.out.println("parseInt from String '123' -> " + fromString);
+
+        Integer maybeNull = null;
+        try {
+            int crash = maybeNull;
+            System.out.println(crash);
+        } catch (NullPointerException npe) {
+            System.out.println("Unboxing null Integer -> NullPointerException");
+        }
+
+        Integer a = 127;
+        Integer b = 127;
+        System.out.println("a == b (127 cached): " + (a == b));
+
+        Integer x = 1000;
+        Integer y = 1000;
+        System.out.println("x == y (1000 not cached): " + (x == y));
+        System.out.println("x.equals(y): " + x.equals(y));
+
+        Integer original = 10;
+        Integer modified = original + 5;
+        System.out.println("original: " + original + ", modified: " + modified);
+    }
+
+    static void lambdaExamples() {
+        Runnable r = () -> System.out.println("Hello from a lambda Runnable!");
+        r.run();
+
+        Comparator<Integer> desc = (i1, i2) -> Integer.compare(i2, i1);
+        List<Integer> nums = Arrays.asList(3, 1, 4, 1, 5, 9);
+        nums.sort(desc);
+        System.out.println("Sorted descending: " + nums);
+
+        Function<String, Integer> lengthFn = s -> s.length();
+        Predicate<String> startsWithA = s -> s.startsWith("A");
+        Consumer<String> printer = s -> System.out.println("Consumed: " + s);
+
+        String test = "Apple";
+        System.out.println("Length of '" + test + "': " + lengthFn.apply(test));
+        System.out.println("'" + test + "' startsWith A? " + startsWithA.test(test));
+        printer.accept("A message to print");
+
+        Consumer<String> methodRefPrinter = System.out::println;
+        methodRefPrinter.accept("Printed via method reference");
+
+        StringTransformer removeVowels = str -> str.replaceAll("(?i)[aeiou]", "");
+        StringTransformer shout = str -> str.toUpperCase() + "!!!";
+
+        String sample = "Hello Lambda";
+        System.out.println("Remove vowels: " + removeVowels.transform(sample));
+        System.out.println("Shout: " + shout.transform(sample));
+
+        int factor = 3;
+        Function<Integer, Integer> multiplier = n -> n * factor;
+        System.out.println("5 * factor(3) = " + multiplier.apply(5));
+    }
+
+    static void streamExamples() {
+        List<String> words = Arrays.asList("apple", "banana", "avocado", "blueberry", "apricot");
+
+        List<String> aWordsUpper = words.stream()
+            .filter(w -> w.startsWith("a"))
+            .map(String::toUpperCase)
+            .collect(Collectors.toList());
+
+        System.out.println("Words starting with 'a' (uppercased): " + aWordsUpper);
+
+        String joined = words.stream()
+            .filter(w -> w.length() > 5)
+            .collect(Collectors.joining(", "));
+
+        System.out.println("Words length>5 joined: " + joined);
+
+        int sum = IntStream.rangeClosed(1, 5).sum();
+        System.out.println("Sum 1..5 = " + sum);
+
+        List<Integer> boxed = IntStream.rangeClosed(1, 5)
+                                .boxed()
+                                .collect(Collectors.toList());
+        System.out.println("Boxed list: " + boxed);
+    }
+}
+ 
